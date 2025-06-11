@@ -1,10 +1,11 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-import matplotlib.pyplot as plt
 from services.data_fetcher import fetch_data
 from services.model import prepare_data, train_model
 from services.preditctor import predict_future
 from services.resource_saver import save_results
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 
 def launch_app():
     app = tk.Tk()
@@ -35,17 +36,22 @@ def launch_app():
 
         try:
             df = fetch_data(ticker)
-            X, y, scaler = prepare_data(df)
+            X, y, scaler, df_close = prepare_data(df)
             model = train_model(X, y)
-            predicted, actual = predict_future(model, X, y, scaler, forecast_days=days_forward)
-            save_results(ticker, predicted)
+            predicted_dates, predicted_values = predict_future(model, X, scaler, df_close.index[-1], days_forward)
+            save_results(ticker, predicted_values)
 
-            # Wykres
+            # Wykres z datami
             plt.figure(figsize=(10, 5))
-            plt.plot(actual, label="Rzeczywiste")
-            plt.plot(predicted, label=f"Predykcja ({days_forward} dni)")
+            plt.plot(df_close.index, df_close["Close"], label="Rzeczywiste", color="blue")
+            plt.plot(predicted_dates, predicted_values, label=f"Predykcja ({days_forward} dni)", color="orange")
+            plt.gca().xaxis.set_major_locator(mdates.AutoDateLocator())
+            plt.gca().xaxis.set_major_formatter(mdates.DateFormatter("%b %Y"))
+            plt.xticks(rotation=45)
+            plt.title(f"Predykcja cen dla {ticker} ($)")
             plt.legend()
-            plt.title(f"Predykcja cen dla {ticker}")
+            plt.tight_layout()
+            plt.grid(True)
             plt.show()
 
         except Exception as e:

@@ -15,7 +15,9 @@ def prepare_data(df, look_back=60):
 
     X = np.array(X)
     y = np.array(y)
-    return X.reshape((X.shape[0], X.shape[1], 1)), y, scaler
+    df_close = df.iloc[look_back:]  # odpowiadający zakres dla y
+
+    return X.reshape((X.shape[0], X.shape[1], 1)), y, scaler, df_close
 
 def train_model(X, y):
     model = Sequential()
