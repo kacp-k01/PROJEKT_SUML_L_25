@@ -5,3 +5,10 @@ def fetch_data(ticker: str, period="5y"):
     if data.empty:
         raise ValueError("Nie znaleziono danych dla podanego tickera.")
     return data[['Close']]
+
+
+def fetch_company_info(ticker: str):
+    info = yf.Ticker(ticker).info
+    if info is None or not info:
+        raise ValueError("Nie znaleziono danych dla podanego tickera.")
+    return info

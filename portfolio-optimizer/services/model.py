@@ -19,10 +19,10 @@ def prepare_data(df, look_back=60):
 
     return X.reshape((X.shape[0], X.shape[1], 1)), y, scaler, df_close
 
-def train_model(X, y):
+def train_model(X, y, epochs=10, batch_size=32):
     model = Sequential()
     model.add(LSTM(50, return_sequences=False, input_shape=(X.shape[1], 1)))
     model.add(Dense(1))
     model.compile(optimizer='adam', loss='mean_squared_error')
-    model.fit(X, y, epochs=10, batch_size=32, verbose=0)
-    return model
+    history = model.fit(X, y, epochs=epochs, batch_size=batch_size, verbose=0)
+    return model, history

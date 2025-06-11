@@ -1,58 +1,69 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+
+from tkhtmlview import HTMLScrolledText
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from services.data_fetcher import fetch_data
+from services.data_fetcher import fetch_data, fetch_company_info
 from services.model import prepare_data, train_model
 from services.preditctor import predict_future
 from services.resource_saver import save_results
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+from sklearn.metrics import mean_squared_error, mean_absolute_error
+import numpy as np
 import pandas as pd
 
 def launch_app():
-    # Główne okno
     app = tk.Tk()
     app.title("Portfolio Optimizer")
-    app.geometry("600x600")
-    app.configure(bg="#e6f0ff")  # jasnoniebieskie tło
+    app.geometry("1400x700")
+    app.configure(bg="#e6f0ff")
 
-    # Stylizacja czcionek i stylów
     style = ttk.Style()
-    style.configure("TLabel", font=("Segoe UI", 12), background="#e6f0ff")
+    style.configure("TLabel", font=("Segoe UI", 11, "bold"), background="#e6f0ff", foreground="#333333")
     style.configure("TButton", font=("Segoe UI", 11), padding=6)
     style.configure("TEntry", font=("Segoe UI", 11))
     style.configure("TCombobox", font=("Segoe UI", 11))
 
-    # Nagłówek
-    header = ttk.Label(app, text="Portfolio Optimizer", font=("Segoe UI", 16, "bold"))
-    header.pack(pady=10)
+    # Layout
+    main_frame = tk.Frame(app, bg="#e6f0ff")
+    main_frame.pack(fill="both", expand=True, padx=10, pady=10)
 
-    # Pole na ticker
-    ticker_label = ttk.Label(app, text="Podaj ticker (np. AAPL):")
-    ticker_label.pack()
-    ticker_entry = ttk.Entry(app, width=20)
-    ticker_entry.pack(pady=5)
+    left_panel = tk.Frame(main_frame, width=250, bg="#e6f0ff")
+    left_panel.pack(side="left", fill="y", padx=10)
 
-    # Dropdown do wyboru horyzontu
-    forecast_label = ttk.Label(app, text="Wybierz horyzont czasowy predykcji (dni):")
-    forecast_label.pack()
-    forecast_options = [1, 5, 30, 60, 100]
-    forecast_var = tk.IntVar(value=1)
-    forecast_menu = ttk.Combobox(app, textvariable=forecast_var, values=forecast_options, state="readonly", width=10)
-    forecast_menu.pack(pady=5)
+    center_panel = ttk.LabelFrame(main_frame, text="Wizualizacja predykcji", padding=(10, 10))
+    center_panel.pack(side="left", fill="both", expand=True, padx=10, pady=10)
 
-    # Ramka na wykres
-    chart_frame = ttk.LabelFrame(app, text="Wykres predykcji", padding=(10, 10))
-    chart_frame.pack(padx=20, pady=15, fill="both", expand=True)
+    right_panel = ttk.LabelFrame(main_frame, text="Raport", padding=(10, 10))
+    right_panel.pack(side="right", fill="both", padx=10, pady=5)
 
-    # Puste płótno na wykres
-    canvas_widget = None
+    # ========== POLA WYBORU ==========
+    ttk.Label(left_panel, text="Ticker:").pack(anchor="w", pady=(10, 0))
+    ticker_entry = ttk.Entry(left_panel)
+    ticker_entry.pack(fill="x", pady=5)
 
+    ttk.Label(left_panel, text="Horyzont predykcji (dni):").pack(anchor="w", pady=(10, 0))
+    forecast_var = tk.IntVar(value=30)
+    forecast_menu = ttk.Combobox(left_panel, textvariable=forecast_var, values=[1, 5, 30, 60, 100], state="readonly")
+    forecast_menu.pack(fill="x", pady=5)
+
+    ttk.Label(left_panel, text="Epoki treningu:").pack(anchor="w", pady=(10, 0))
+    epochs_var = tk.IntVar(value=10)
+    epochs_entry = ttk.Entry(left_panel, textvariable=epochs_var)
+    epochs_entry.pack(fill="x", pady=5)
+
+    ttk.Label(left_panel, text="Batch size:").pack(anchor="w", pady=(10, 0))
+    batch_var = tk.IntVar(value=32)
+    batch_entry = ttk.Entry(left_panel, textvariable=batch_var)
+    batch_entry.pack(fill="x", pady=5)
+
+    # ========== PRZYCISK ==========
     def run_prediction():
-        nonlocal canvas_widget  # pozwala nadpisać poprzedni wykres
-
         ticker = ticker_entry.get().upper()
         days_forward = forecast_var.get()
+        epochs = epochs_var.get()
+        batch_size = batch_var.get()
 
         if not ticker:
             messagebox.showerror("Błąd", "Musisz podać ticker!")
@@ -60,12 +71,54 @@ def launch_app():
 
         try:
             df = fetch_data(ticker)
+            info = fetch_company_info(ticker)
             X, y, scaler, df_close = prepare_data(df)
-            model = train_model(X, y)
+            model, history = train_model(X, y, epochs=epochs, batch_size=batch_size)
             predicted_dates, predicted_values = predict_future(model, X, scaler, df_close.index[-1], days_forward)
+            predicted_train = model.predict(X, verbose=0)
+            predicted_train_inv = scaler.inverse_transform(predicted_train)
+            y_inv = scaler.inverse_transform(y.reshape(-1, 1))
+
+            mse = mean_squared_error(y_inv, predicted_train_inv)
+            rmse = np.sqrt(mse)
+            mae = mean_absolute_error(y_inv, predicted_train_inv)
             save_results(ticker, predicted_values)
 
-            # Tworzenie wykresu
+            company_name = info.get("longName", "Brak nazwy")
+            industry = info.get("industry", "Brak branży")
+            country = info.get("country", "Brak kraju")
+            currency = info.get("currency", "Brak podanej waluty")
+            previous_close = info.get("previousClose", "N/A")
+            current_price = info.get("currentPrice", "N/A")
+            # ========== RAPORT ==========
+            report_text = f"""
+                       <h3 style='margin-bottom: 10px;'>Informacje o spółce</h3>
+                       <b>Spółka:</b> {company_name}<br>
+                       <b>Branża:</b> {industry}<br>
+                       <b>Kraj:</b> {country}<br>
+                       <b>Waluta:</b> {currency}<br><br>
+
+                       <h3 style='margin-bottom: 10px;'>Parametry predykcji</h3>
+                       <b>Ticker:</b> {ticker}<br>
+                       <b>Epoki:</b> {epochs}<br>
+                       <b>Batch size:</b> {batch_size}<br>
+                       <b>Dni do przodu:</b> {days_forward}<br>
+                       <b>Liczba rekordów:</b> {len(df)}<br>
+                       <b>Aktualna cena:</b> {current_price}<br>
+                       <b>Poprzednie zamknięcie:</b> {previous_close}<br><br>
+
+                       <h3 style='margin-bottom: 10px;'>Wyniki modelu</h3>
+                       <b>Strata końcowa (loss):</b> {round(history.history['loss'][-1], 6)}<br>
+                       <b>MSE:</b> {mse:.6f}<br>
+                       <b>RMSE:</b> {rmse:.6f}<br>
+                       <b>MAE:</b> {mae:.6f}
+                       """
+            report_html = HTMLScrolledText(right_panel, html="", width=40)
+            report_html.pack(fill="both", expand=True)
+            report_html.configure(background="#f8faff", font=("Segoe UI", 10))
+            report_html.set_html(report_text)
+
+            # ========== WYKRES ==========
             fig, ax = plt.subplots(figsize=(7, 4), dpi=100)
             ax.plot(df_close.index, df_close["Close"], label="Rzeczywiste", color="blue")
             ax.plot(predicted_dates, predicted_values, label=f"Predykcja ({days_forward} dni)", color="orange")
@@ -76,20 +129,21 @@ def launch_app():
             ax.grid(True)
             ax.legend()
 
-            # Usuwanie poprzedniego wykresu jeśli istnieje
-            if canvas_widget:
-                canvas_widget.get_tk_widget().destroy()
+            if hasattr(app, 'canvas_widget') and app.canvas_widget:
+                app.canvas_widget.get_tk_widget().destroy()
 
-            # Osadzenie wykresu w GUI
-            canvas_widget = FigureCanvasTkAgg(fig, master=chart_frame)
-            canvas_widget.draw()
-            canvas_widget.get_tk_widget().pack(fill="both", expand=True)
+            app.canvas_widget = FigureCanvasTkAgg(fig, master=center_panel)
+            app.canvas_widget.draw()
+            app.canvas_widget.get_tk_widget().pack(fill="both", expand=True)
 
         except Exception as e:
             messagebox.showerror("Błąd", str(e))
 
-    # Przycisk do uruchomienia predykcji
-    predict_button = ttk.Button(app, text="Uruchom predykcję", command=run_prediction)
-    predict_button.pack(pady=10)
+    ttk.Button(left_panel, text="Uruchom predykcję", command=run_prediction).pack(pady=(20, 0), fill="x")
+
+    # ========== RAPORT BOX ==========
+    # report_box = tk.Text(right_panel, height=20, width=40, wrap="word", bg="#f8faff", font=("Consolas", 10))
+    # report_box.pack(fill="both", expand=True)
+    # report_box.config(state="disabled")
 
     app.mainloop()

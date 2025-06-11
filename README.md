@@ -25,3 +25,5 @@ Efektem będzie prosta w obsłudze aplikacja, dająca inwestorowi dostęp do mo�
 
 ### Zastosowany model uczenia maszynowego:
 Sekwencyjna sieć neuronowa LSTM bazująca na uporządkowanych danych historycznych. Użyta zostanie wersja z pakietu Keras. Będzie trenowana na zawołanie, na podstawie danych wybranych przez użytkownika.
+
+Opis modelu
