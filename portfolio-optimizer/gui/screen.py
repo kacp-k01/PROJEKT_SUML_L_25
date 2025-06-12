@@ -88,6 +88,7 @@ def launch_app():
             mse = mean_squared_error(y_inv, predicted_train_inv)
             rmse = np.sqrt(mse)
             mae = mean_absolute_error(y_inv, predicted_train_inv)
+            # TODO: modyfikacja zapisu
             save_results(ticker, predicted_values)
 
             company_name = info.get("longName", "Brak nazwy")
@@ -119,6 +120,7 @@ def launch_app():
                        <b>RMSE:</b> {rmse:.2f}{currency}<br>
                        <b>MAE:</b> {mae:.2f}{currency}
                        """
+            # ========== RAPORT BOX ==========
             report_html = HTMLScrolledText(right_panel, html="", width=40)
             report_html.pack(fill="both", expand=True)
             report_html.configure(background="#f8faff", font=("Segoe UI", 10))
@@ -147,5 +149,4 @@ def launch_app():
 
     ttk.Button(left_panel, text="Uruchom predykcję", command=run_prediction).pack(pady=(20, 0), fill="x")
 
-    # ========== RAPORT BOX ==========
     app.mainloop()

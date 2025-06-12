@@ -10,5 +10,5 @@ def fetch_data(ticker: str, period="5y"):
 def fetch_company_info(ticker: str):
     info = yf.Ticker(ticker).info
     if info is None or not info:
-        raise ValueError("Nie znaleziono danych dla podanego tickera.")
+        raise ValueError("Nie znaleziono danych informacyjnych dla podanego tickera.")
     return info
