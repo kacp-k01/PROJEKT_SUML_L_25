@@ -11,7 +11,6 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 import numpy as np
-import pandas as pd
 
 def launch_app():
     app = tk.Tk()
@@ -35,11 +34,14 @@ def launch_app():
     center_panel = ttk.LabelFrame(main_frame, text="Wizualizacja predykcji", padding=(10, 10))
     center_panel.pack(side="left", fill="both", expand=True, padx=10, pady=10)
 
-    right_panel = ttk.LabelFrame(main_frame, text="Raport", padding=(10, 10))
-    right_panel.pack(side="right", fill="both", padx=10, pady=5)
+    right_panel = ttk.LabelFrame(main_frame, text="Raport", padding=(10, 10), width=350)
+    right_panel.pack(side="right", fill="y", padx=10, pady=5)
+    right_panel.pack_propagate(False)
 
     # ========== POLA WYBORU ==========
     ttk.Label(left_panel, text="Ticker:").pack(anchor="w", pady=(10, 0))
+    tk.Label(left_panel, text="Oznaczenie danego instrumentu finansowego.",
+             font=("Segoe UI", 8), fg="#333333", bg="#e6f0ff", wraplength=200, justify="left").pack(anchor="w")
     ticker_entry = ttk.Entry(left_panel)
     ticker_entry.pack(fill="x", pady=5)
 
@@ -49,11 +51,15 @@ def launch_app():
     forecast_menu.pack(fill="x", pady=5)
 
     ttk.Label(left_panel, text="Epoki treningu:").pack(anchor="w", pady=(10, 0))
+    tk.Label(left_panel, text="Liczba epok – ile razy model przejrzy dane. Zbyt mało - niedotrenowanie. Zbyt dużo - przetrenowanie.",
+             font=("Segoe UI", 8), fg="#333333", bg="#e6f0ff", wraplength=200, justify="left").pack(anchor="w")
     epochs_var = tk.IntVar(value=10)
     epochs_entry = ttk.Entry(left_panel, textvariable=epochs_var)
     epochs_entry.pack(fill="x", pady=5)
 
-    ttk.Label(left_panel, text="Batch size:").pack(anchor="w", pady=(10, 0))
+    ttk.Label(left_panel, text="Wielkość grupy:").pack(anchor="w", pady=(10, 0))
+    tk.Label(left_panel, text="Wielkość grupy danych (batch) przy uczeniu. Im większa, tym większe tempo uczenia modelu i mniejsza dokładność.",
+             font=("Segoe UI", 8), fg="#333333", bg="#e6f0ff", wraplength=200, justify="left").pack(anchor="w")
     batch_var = tk.IntVar(value=32)
     batch_entry = ttk.Entry(left_panel, textvariable=batch_var)
     batch_entry.pack(fill="x", pady=5)
@@ -100,8 +106,8 @@ def launch_app():
 
                        <h3 style='margin-bottom: 10px;'>Parametry predykcji</h3>
                        <b>Ticker:</b> {ticker}<br>
-                       <b>Epoki:</b> {epochs}<br>
-                       <b>Batch size:</b> {batch_size}<br>
+                       <b>Epoki treningowe:</b> {epochs}<br>
+                       <b>Wielkość grupy:</b> {batch_size}<br>
                        <b>Dni do przodu:</b> {days_forward}<br>
                        <b>Liczba rekordów:</b> {len(df)}<br>
                        <b>Aktualna cena:</b> {current_price}<br>
@@ -109,9 +115,9 @@ def launch_app():
 
                        <h3 style='margin-bottom: 10px;'>Wyniki modelu</h3>
                        <b>Strata końcowa (loss):</b> {round(history.history['loss'][-1], 6)}<br>
-                       <b>MSE:</b> {mse:.6f}<br>
-                       <b>RMSE:</b> {rmse:.6f}<br>
-                       <b>MAE:</b> {mae:.6f}
+                       <b>MSE:</b> {mse:.2f}<br>
+                       <b>RMSE:</b> {rmse:.2f}{currency}<br>
+                       <b>MAE:</b> {mae:.2f}{currency}
                        """
             report_html = HTMLScrolledText(right_panel, html="", width=40)
             report_html.pack(fill="both", expand=True)
@@ -142,8 +148,4 @@ def launch_app():
     ttk.Button(left_panel, text="Uruchom predykcję", command=run_prediction).pack(pady=(20, 0), fill="x")
 
     # ========== RAPORT BOX ==========
-    # report_box = tk.Text(right_panel, height=20, width=40, wrap="word", bg="#f8faff", font=("Consolas", 10))
-    # report_box.pack(fill="both", expand=True)
-    # report_box.config(state="disabled")
-
     app.mainloop()
