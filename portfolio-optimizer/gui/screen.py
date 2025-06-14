@@ -6,7 +6,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from services.data_fetcher import fetch_data, fetch_company_info
 from services.model import prepare_data, train_model
 from services.preditctor import predict_future
-from services.resource_saver import save_results
+from services.resource_saver import save_report_and_plot
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from sklearn.metrics import mean_squared_error, mean_absolute_error
@@ -14,6 +14,7 @@ import numpy as np
 
 def launch_app():
     app = tk.Tk()
+    app.report_html = None
     app.title("Portfolio Optimizer")
     app.geometry("1400x700")
     app.configure(bg="#e6f0ff")
@@ -88,8 +89,6 @@ def launch_app():
             mse = mean_squared_error(y_inv, predicted_train_inv)
             rmse = np.sqrt(mse)
             mae = mean_absolute_error(y_inv, predicted_train_inv)
-            # TODO: modyfikacja zapisu
-            save_results(ticker, predicted_values)
 
             company_name = info.get("longName", "Brak nazwy")
             industry = info.get("industry", "Brak branży")
@@ -120,11 +119,38 @@ def launch_app():
                        <b>RMSE:</b> {rmse:.2f}{currency}<br>
                        <b>MAE:</b> {mae:.2f}{currency}
                        """
+
+            raport_pure_text = (f"""\
+Informacje o spółce:
+Spółka: {company_name}
+Branża: {industry}
+Kraj: {country}
+Waluta: {currency}
+
+Parametry predykcji:
+Ticker: {ticker}
+Epoki treningowe: {epochs}
+Wielkość grupy: {batch_size}
+Dni do przodu: {days_forward}
+Liczba rekordów: {len(df)}
+Aktualna cena: {current_price}
+Poprzednie zamknięcie: {previous_close}
+
+Wyniki modelu
+Strata końcowa (loss): {round(history.history['loss'][-1], 6)}
+MSE: {mse:.2f}
+RMSE: {rmse:.2f}{currency}
+MAE: {mae:.2f}{currency}
+""")
+
             # ========== RAPORT BOX ==========
-            report_html = HTMLScrolledText(right_panel, html="", width=40)
-            report_html.pack(fill="both", expand=True)
-            report_html.configure(background="#f8faff", font=("Segoe UI", 10))
-            report_html.set_html(report_text)
+            if app.report_html:
+                app.report_html.set_html(report_text)
+            else:
+                app.report_html = HTMLScrolledText(right_panel, html="", width=40)
+                app.report_html.pack(fill="both", expand=True)
+                app.report_html.configure(background="#f8faff", font=("Segoe UI", 10))
+                app.report_html.set_html(report_text)
 
             # ========== WYKRES ==========
             fig, ax = plt.subplots(figsize=(7, 4), dpi=100)
@@ -144,9 +170,42 @@ def launch_app():
             app.canvas_widget.draw()
             app.canvas_widget.get_tk_widget().pack(fill="both", expand=True)
 
+            app.latest_figure = fig
+            app.latest_ticker = ticker
+            app.latest_pure_text = raport_pure_text
+
         except Exception as e:
             messagebox.showerror("Błąd", str(e))
 
     ttk.Button(left_panel, text="Uruchom predykcję", command=run_prediction).pack(pady=(20, 0), fill="x")
+
+    # ========== OPCJE ZAPISU ==========
+    save_plot_var = tk.BooleanVar(value=True)
+    save_text_var = tk.BooleanVar(value=True)
+
+    ttk.Checkbutton(left_panel, text="Zapisz wykres (.png)", variable=save_plot_var).pack(anchor="w", pady=(10, 0))
+    ttk.Checkbutton(left_panel, text="Zapisz raport (.txt)", variable=save_text_var).pack(anchor="w")
+
+    def save_outputs():
+        from tkinter import filedialog
+        if not hasattr(app, 'latest_figure') or not hasattr(app, 'latest_pure_text') or not hasattr(app, 'latest_ticker'):
+            messagebox.showwarning("Brak danych", "Najpierw uruchom predykcję.")
+            return
+
+        directory = filedialog.askdirectory(title="Wybierz folder zapisu")
+        if directory:
+            save_report_and_plot(
+                app.latest_ticker,
+                app.latest_figure,
+                app.latest_pure_text,
+                directory,
+                save_plot=save_plot_var.get(),
+                save_text=save_text_var.get()
+            )
+            messagebox.showinfo("Zapisano", "Pliki zostały zapisane.")
+
+    ttk.Button(left_panel, text="Zapisz wyniki", command=save_outputs).pack(pady=(10, 0), fill="x")
+
+    ttk.Button(left_panel, text="Zamknij program", command=app.destroy).pack(pady=(10, 0), fill="x")
 
     app.mainloop()
