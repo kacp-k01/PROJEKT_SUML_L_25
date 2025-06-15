@@ -12,13 +12,20 @@ Aplikacja desktopowa
 ## Opis aplikacji:
 Dokładny opis aplikacji i raport z jej działania znajduje się w pliku `raport/Raport_Projekt_SUML.pdf`.
 
+### Uruchomienie aplikacji:
 Wymagania bibliotek zapisano w pliku `requirements.txt`. Aplikacja została utworzona na Pythonie `3.12`
-
-Aplikacja w formie desktopowej, wygenerowana do pliku `PortfolioOptimizer.exe` przy użyciu PyInstaller, jest dostępna w katalogu `dist/`.
-Do jej przygotowania użyto polecenia (_podmoduły **tensorflow** i **keras** zostały dodane jako hidden-importy, aby uniknąć problemów z importem podczas uruchamiania_):
-```bash
-pyinstaller --noconfirm --onefile --console projekt_suml.py --hidden-import=tf_keras.src.engine.base_layer_v1 --hidden-import=tensorflow.keras
-```
+Aplikację można uruchomić:
+- poprzez plik `projekt_suml.py` znajdujący się w katalogu głównym projektu (`portfolio-optimizer/`)
+- lub przygotowując plik .exe do uruchomienia lokalnego:
+  - Najpierw instalujemy bibliotekę pyinstaller (jeśli jej jeszcze nie mamy):
+    ```bash
+    pip install pyinstaller
+    ```
+  - Potem przygotowujemy plik wykonawczy .exe (_podmoduły **tensorflow** i **keras** zostały dodane jako hidden-importy, aby uniknąć problemów z importem podczas uruchamiania_):
+    ```bash
+    pyinstaller --noconfirm --onefile --console projekt_suml.py --hidden-import=tf_keras.src.engine.base_layer_v1 --hidden-import=tensorflow.keras
+    ```
+  - Po wykonaniu powyższego polecenia, w katalogu `dist/` zostanie utworzony plik `projekt_suml.exe`, który można uruchomić lokalnie.
 
 
 ## Dataset:
