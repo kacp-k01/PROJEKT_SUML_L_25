@@ -23,7 +23,7 @@ Aplikację można uruchomić:
     ```
   - Potem przygotowujemy plik wykonawczy .exe (_podmoduły **tensorflow** i **keras** zostały dodane jako hidden-importy, aby uniknąć problemów z importem podczas uruchamiania_):
     ```bash
-    pyinstaller --noconfirm --onefile --console projekt_suml.py --hidden-import=tf_keras.src.engine.base_layer_v1 --hidden-import=tensorflow.keras
+    pyinstaller --noconfirm --onefile --noconsole projekt_suml.py --hidden-import=tf_keras.src.engine.base_layer_v1 --hidden-import=tensorflow.keras
     ```
   - Po wykonaniu powyższego polecenia, w katalogu `dist/` zostanie utworzony plik `projekt_suml.exe`, który można uruchomić lokalnie.
 
