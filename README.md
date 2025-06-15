@@ -1,11 +1,25 @@
 # Portfolio Optimizer
-Projekt na przedmiot SUML, wykonany przez studentów: Kacper Kuc (s25822), Jakub Ośka (s24187) i Cezary Klasicki (s25819)
+Projekt na przedmiot SUML, wykonany przez studentów: 
+- Kacper Kuc (s25822)
+- Jakub Ośka (s24187)
+- Cezary Klasicki (s25819)
 
 ## Rodzaj aplikacji:
 Aplikacja desktopowa
 - Język backend'u python
 - Frontend zbudowany przy użyciu tinkera
+
 ## Opis aplikacji:
+Dokładny opis aplikacji i raport z jej działania znajduje się w pliku `raport/Raport_Projekt_SUML.pdf`.
+
+Wymagania bibliotek zapisano w pliku `requirements.txt`. Aplikacja została utworzona na Pythonie `3.12`
+
+Aplikacja w formie desktopowej, wygenerowana do pliku `PortfolioOptimizer.exe` przy użyciu PyInstaller, jest dostępna w katalogu `dist/`.
+Do jej przygotowania użyto polecenia (_podmoduły **tensorflow** i **keras** zostały dodane jako hidden-importy, aby uniknąć problemów z importem podczas uruchamiania_):
+```bash
+pyinstaller --noconfirm --onefile --console projekt_suml.py --hidden-import=tf_keras.src.engine.base_layer_v1 --hidden-import=tensorflow.keras
+```
+
 
 ## Dataset:
 - Historyczne dane instrumentów finansowych (akcji, funduszy) pobierane z biblioteki YFinance.
@@ -25,5 +39,3 @@ Efektem będzie prosta w obsłudze aplikacja, dająca inwestorowi dostęp do mo�
 
 ### Zastosowany model uczenia maszynowego:
 Sekwencyjna sieć neuronowa LSTM bazująca na uporządkowanych danych historycznych. Użyta zostanie wersja z pakietu Keras. Będzie trenowana na zawołanie, na podstawie danych wybranych przez użytkownika.
-
-Opis modelu

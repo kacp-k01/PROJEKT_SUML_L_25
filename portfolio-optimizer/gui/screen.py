@@ -15,17 +15,20 @@ import numpy as np
 def launch_app():
     app = tk.Tk()
     app.report_html = None
+    app.training_label = None
+    app.animating = False
     app.title("Portfolio Optimizer")
     app.geometry("1400x700")
     app.configure(bg="#e6f0ff")
 
+    # ========== STYLE APKI ==========
     style = ttk.Style()
     style.configure("TLabel", font=("Segoe UI", 11, "bold"), background="#e6f0ff", foreground="#333333")
     style.configure("TButton", font=("Segoe UI", 11), padding=6)
     style.configure("TEntry", font=("Segoe UI", 11))
     style.configure("TCombobox", font=("Segoe UI", 11))
 
-    # Layout
+    # ========== PODSTAWOWY LAYOUT ==========
     main_frame = tk.Frame(app, bg="#e6f0ff")
     main_frame.pack(fill="both", expand=True, padx=10, pady=10)
 
@@ -65,7 +68,32 @@ def launch_app():
     batch_entry = ttk.Entry(left_panel, textvariable=batch_var)
     batch_entry.pack(fill="x", pady=5)
 
-    # ========== PRZYCISK ==========
+    # ========== ANIMACJA TRENINGU ==========
+    def start_training_animation():
+        if app.training_label is None:
+            app.training_label = ttk.Label(left_panel, text="Trwa trenowanie", foreground="blue")
+            app.training_label.pack(pady=(10, 0))
+
+        app.animating = True
+        animate_training_dots()
+
+    def animate_training_dots():
+        if not app.animating:
+            return
+        current = app.training_label["text"]
+        if current.endswith("..."):
+            app.training_label.config(text="Trwa trenowanie")
+        else:
+            app.training_label.config(text=current + ".")
+        app.after(500, animate_training_dots)
+
+    def stop_training_animation():
+        app.animating = False
+        if app.training_label:
+            app.training_label.destroy()
+            app.training_label = None
+
+    # ========== PREDYKCJA ==========
     def run_prediction():
         ticker = ticker_entry.get().upper()
         days_forward = forecast_var.get()
@@ -77,6 +105,8 @@ def launch_app():
             return
 
         try:
+            start_training_animation()
+            app.update_idletasks()
             df = fetch_data(ticker)
             info = fetch_company_info(ticker)
             X, y, scaler, df_close = prepare_data(df)
@@ -176,10 +206,13 @@ MAE: {mae:.2f}{currency}
 
         except Exception as e:
             messagebox.showerror("Błąd", str(e))
+            stop_training_animation()
+
+        stop_training_animation()
 
     ttk.Button(left_panel, text="Uruchom predykcję", command=run_prediction).pack(pady=(20, 0), fill="x")
 
-    # ========== OPCJE ZAPISU ==========
+    # ========== ZAPIS ==========
     save_plot_var = tk.BooleanVar(value=True)
     save_text_var = tk.BooleanVar(value=True)
 
@@ -206,6 +239,7 @@ MAE: {mae:.2f}{currency}
 
     ttk.Button(left_panel, text="Zapisz wyniki", command=save_outputs).pack(pady=(10, 0), fill="x")
 
+    # ========== ZAMKNIĘCIE PROGRAMU ==========
     ttk.Button(left_panel, text="Zamknij program", command=app.destroy).pack(pady=(10, 0), fill="x")
 
     app.mainloop()

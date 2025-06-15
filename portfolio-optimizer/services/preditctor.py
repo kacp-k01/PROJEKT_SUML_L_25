@@ -13,7 +13,6 @@ def predict_future(model, X, scaler, last_date, forecast_days=1):
         future_predictions.append(next_pred[0, 0])
         current_input = np.append(current_input[1:], next_pred[0, 0])
 
-    # Odskalowanie i tworzenie zakresu dat
     predicted_values = scaler.inverse_transform(np.array(future_predictions).reshape(-1, 1)).flatten()
     predicted_dates = pd.date_range(start=last_date + pd.Timedelta(days=1), periods=forecast_days, freq='B')  # B = dni robocze
 
