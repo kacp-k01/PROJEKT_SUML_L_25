@@ -17,12 +17,16 @@ Wymagania bibliotek zapisano w pliku `requirements.txt`. Aplikacja została utwo
 Aplikację można uruchomić:
 - poprzez plik `projekt_suml.py` znajdujący się w katalogu głównym projektu (`portfolio-optimizer/`)
 - lub przygotowując plik .exe do uruchomienia lokalnego:
+  - Przechodzimy do katalogu głównego projektu:
+    ```shell
+    cd .\portfolio-optimizer
+    ```
   - Najpierw instalujemy bibliotekę pyinstaller (jeśli jej jeszcze nie mamy):
-    ```bash
+    ```shell
     pip install pyinstaller
     ```
   - Potem przygotowujemy plik wykonawczy .exe (_podmoduły **tensorflow** i **keras** zostały dodane jako hidden-importy, aby uniknąć problemów z importem podczas uruchamiania_):
-    ```bash
+    ```shell
     pyinstaller --noconfirm --onefile --noconsole projekt_suml.py --hidden-import=tf_keras.src.engine.base_layer_v1 --hidden-import=tensorflow.keras
     ```
   - Po wykonaniu powyższego polecenia, w katalogu `dist/` zostanie utworzony plik `projekt_suml.exe`, który można uruchomić lokalnie.
