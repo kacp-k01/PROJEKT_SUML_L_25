@@ -42,9 +42,8 @@ Aplikacja będzie służyć do predykcji przyszłych cen wybranych instrumentów
 
 ### Uzasadnienie funkcjonalności aplikacji:
 Aplikacja będzie pomocą dla prywatnych inwestorów, którzy chcieli by oszacować / porównać przewidywane ceny akcji/funduszu na podstawie danych historycznych. Jako wersja desktopowa, dodana zostanie:
-- możliwość tworzeni kont użytkowników.
 - możliwość zapisywania ewentualnych wyników pozwoli także porównywać starsze analizy z nowszymi, w celu obserwacji wpływu zmian na rynku.
-- Wyniki będą wizualizowane za pomocą tabel i komponentów graficznych
+- Wyniki będą wizualizowane za pomocą raportu tekstowego i komponentów graficznych
 
 Efektem będzie prosta w obsłudze aplikacja, dająca inwestorowi dostęp do możliwości, jakie daje uczenie maszynowe bez konieczności dokładnej znajomości strony technicznej wymaganej do samodzielnej implementacji takiego rozwiązania.
 
