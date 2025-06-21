@@ -33,8 +33,8 @@ Aplikację można uruchomić:
 
 
 ## Dataset:
-- Historyczne dane instrumentów finansowych (akcji, funduszy) pobierane z biblioteki YFinance.
-- Dane na potrzeby analiz będą pobierane "on-demand" przez użytkownika, z wykorzystaniem darmowego API, będącego elementem pakietu yfiannce.
+- Historyczne dane instrumentów finansowych (akcji, funduszy) pobierane z biblioteki Yahoo Finance.
+- Dane na potrzeby analiz będą pobierane "on-demand" przez użytkownika, z wykorzystaniem darmowego API.
 - Zapytania zwracają serię danych na podstawie podanych "ticker'ów" (oznaczeń instrumentów finansowych) - domyślnie wprowadzi je użytkownik.
 
 ### Predykcja:
