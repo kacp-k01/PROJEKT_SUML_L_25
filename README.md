@@ -21,7 +21,7 @@ Aplikację można uruchomić:
     ```shell
     cd .\portfolio-optimizer
     ```
-  - Najpierw instalujemy bibliotekę pyinstaller (jeśli jej jeszcze nie mamy) - podczas testowego wypalenia projektu pracowano na wersji ***6.12.0*:
+  - Najpierw instalujemy bibliotekę pyinstaller (jeśli jej jeszcze nie mamy) - podczas testowego wypalenia projektu pracowano na wersji **6.12.0**:
     ```shell
     pip install pyinstaller
     ```
